@@ -9,5 +9,6 @@
 #include "ls.h"
 #include "tree.h"
 #include "rm.h"
+#include "mv.h"
 
 #endif
