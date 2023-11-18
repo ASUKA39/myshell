@@ -2,15 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct hash_node_st{
-    char *cmd;
-    int (*handler)(int argc, char **argv);
-    struct hash_node_st *next;
-}HASH_NODE;
+#include "hash.h"
 
-HASH_NODE *hash_table[26];
-
-int hash_register(char *cmd, int (*handler)(int argc, char **argv)){
+int hash_register(HASH_NODE *hash_table[], const char *cmd, int (*handler)(int argc, char **argv)){
     int hash = cmd[0] - 'a';
     HASH_NODE *np;
     np = malloc(sizeof(*np));
@@ -25,7 +19,7 @@ int hash_register(char *cmd, int (*handler)(int argc, char **argv)){
     return 0;
 }
 
-HASH_NODE *hash_search(char *cmd){
+HASH_NODE *hash_search(HASH_NODE *hash_table[], char *cmd){
     int hash = cmd[0] - 'a';
     HASH_NODE *np;
     for(np = hash_table[hash]; np != NULL; np = np->next){

@@ -5,5 +5,6 @@
 
 #include "cp.h"
 #include "pwd.h"
+#include "cd.h"
 
 #endif

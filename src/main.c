@@ -8,6 +8,8 @@
 
 #define DELIMS " \t\n"
 
+HASH_NODE *hash_table[26];
+
 struct cmd_st {
     glob_t globres;
 };
@@ -35,11 +37,20 @@ static void parse(char *line, struct cmd_st *res) {
     }
 }
 
+static HASH_NODE *regist_func(void) {
+    hash_register(hash_table, "cp", cp);
+    hash_register(hash_table, "pwd", pwd);
+    hash_register(hash_table, "cd", cd);
+}
+
 int main(void) {
     char *linebuf = NULL;
     size_t linebuf_size = 0;
     struct cmd_st cmd;
     pid_t pid;
+
+    regist_func();
+
     while(1) {
         prompt();
         if(getline(&linebuf, &linebuf_size, stdin) < 0) {
@@ -51,39 +62,11 @@ int main(void) {
             exit(0);
         }
 
-
-
-
-        if(strcmp(cmd.globres.gl_pathv[0], "cp") == 0) {
-            pid = fork();
-            if(pid < 0) {
-                perror("fork()");
-                exit(1);
-            }
-            if(pid == 0) {
-                cp(cmd.globres.gl_pathc, cmd.globres.gl_pathv);
-                exit(1);
-            } else {
-                wait(NULL);
-            }
+        HASH_NODE *np;
+        np = hash_search(hash_table, cmd.globres.gl_pathv[0]);
+        if(np != NULL) {
+            np->handler(cmd.globres.gl_pathc, cmd.globres.gl_pathv);
         }
-        if(strcmp(cmd.globres.gl_pathv[0], "pwd") == 0) {
-            pid = fork();
-            if(pid < 0) {
-                perror("fork()");
-                exit(1);
-            }
-            if(pid == 0) {
-                pwd(cmd.globres.gl_pathc, cmd.globres.gl_pathv);
-                exit(1);
-            } else {
-                wait(NULL);
-            }
-        }
-
-
-
-
 
         else {
             pid = fork();
