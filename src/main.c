@@ -22,17 +22,12 @@ static void parse(char *line, struct cmd_st *res) {
     char *tok;
     int i = 0;
     while(1) {
-        // strsep 函数将缓冲区按换行符分割
         tok = strsep(&line, DELIMS);
         if(tok == NULL)
             break;
         if(tok[0] == '\0')
             continue;
-       	// 利用 glob 函数的参数特点来模拟 argc 和 argv
-        // NOCHECK：不对pattern进行解析，直接返回pattern（这里是tok），相当于存储了命令行参数tok在glob_t中
-        // APPEND：以追加形式将tok存放在glob_t中，第一次时不追加，因为globres尚未初始化，需要系统来自己分配内存，因此乘上i（乘法优先于按位或）
         glob(tok, GLOB_NOCHECK|GLOB_APPEND*i, NULL, &res->globres);
-        // 置为1，使得追加永远成立
         i = 1;
     }
 }
@@ -42,6 +37,7 @@ static HASH_NODE *regist_func(void) {
     hash_register(hash_table, "pwd", pwd);
     hash_register(hash_table, "cd", cd);
     hash_register(hash_table, "ls", ls);
+    hash_register(hash_table, "tree", tree);
 }
 
 int main(void) {

@@ -4,6 +4,12 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <pwd.h>
+#include <grp.h>
+#include <sys/types.h>
+#include <time.h>
+#include <locale.h>
+#include <langinfo.h>
 
 #include "ls.h"
 #include "pwd.h"
@@ -11,6 +17,8 @@
 
 #define LS_A 1
 #define LS_L 2
+
+static char *getperm(char *perm, struct stat fileStat);
 
 int ls(int argc, char **argv){
     int options = 0;
@@ -30,7 +38,7 @@ int ls(int argc, char **argv){
     }
     else{
         for(int j = 1; j < argc; j++){
-            printf("argv[%d] = %s\n", j, argv[j]);
+            // printf("argv[%d] = %s\n", j, argv[j]);
             if(argv[j][0] == '-'){
                 for(int i = 1; i < strlen(argv[j]); i++){
                     if(argv[j][i] == 'a'){
@@ -77,15 +85,18 @@ int ls(int argc, char **argv){
                         printf("%s\n", cur_dir->d_name);
                         return -1;
                     }
-                    printf("%c%c%c%c%c  ", 
-                        S_ISREG(statbuf.st_mode) ? '-' : 'd',
-                        statbuf.st_mode & S_IRUSR ? 'r' : '-',
-                        statbuf.st_mode & S_IWUSR ? 'w' : '-',
-                        statbuf.st_mode & S_IXUSR ? 'x' : '-',
-                        statbuf.st_mode & S_IXUSR ? 'x' : '-');
-                    printf("%ld  ", statbuf.st_nlink);
-                    printf("%ld  ", statbuf.st_size);
-                    printf("%s  ", cur_dir->d_name);
+                    char perm[11];
+                    char datestring[256];
+                    struct tm *tm = localtime(&statbuf.st_mtime);
+                    strftime(datestring, sizeof(datestring), nl_langinfo(D_T_FMT), tm);
+
+                    printf("%10s ", getperm(perm, statbuf));
+                    printf("%3ld ", statbuf.st_nlink);
+                    printf("%-5s ", getpwuid(statbuf.st_uid)->pw_name);
+                    printf("%-5s ", getgrgid(statbuf.st_gid)->gr_name);
+                    printf("%6ld ", statbuf.st_size);
+                    printf("%s ", datestring);
+                    printf("%s", cur_dir->d_name);
                     printf("\n");
                 }
             }
@@ -100,6 +111,72 @@ int ls(int argc, char **argv){
 
         chdir(pwd);
     }
-    
+       
     return 0;
+}
+
+char *getperm(char *perm, struct stat fileStat) {
+	if(S_ISLNK(fileStat.st_mode)){
+		perm[0] = 'l';
+	}
+	else if(S_ISDIR(fileStat.st_mode)){
+		perm[0] = 'd';
+	}
+	else if(S_ISCHR(fileStat.st_mode)){
+		perm[0] = 'c';
+	}
+	else if(S_ISSOCK(fileStat.st_mode)){
+		perm[0] = 's';
+	}
+	else if(S_ISFIFO(fileStat.st_mode)){
+		perm[0] = 'p';
+	}
+	else if(S_ISBLK(fileStat.st_mode)){
+		perm[0] = 'b';
+	}
+	else {
+		perm[0] = '-';
+	}
+	perm[1] = ((fileStat.st_mode & S_IRUSR) ? 'r' : '-');
+	perm[2] = ((fileStat.st_mode & S_IWUSR) ? 'w' : '-');
+	perm[3] = ((fileStat.st_mode & S_IXUSR) ? 'x' : '-');
+	perm[4] = ((fileStat.st_mode & S_IRGRP) ? 'r' : '-');
+	perm[5] = ((fileStat.st_mode & S_IWGRP) ? 'w' : '-');
+	perm[6] = ((fileStat.st_mode & S_IXGRP) ? 'x' : '-');
+	perm[7] = ((fileStat.st_mode & S_IROTH) ? 'r' : '-');
+	perm[8] = ((fileStat.st_mode & S_IWOTH) ? 'w' : '-');
+	perm[9] = ((fileStat.st_mode & S_IXOTH) ? 'x' : '-');
+
+	if(fileStat.st_mode & S_ISUID){
+		perm[3] = 's';
+	}
+	else if(fileStat.st_mode & S_IXUSR){
+		perm[3] = 'x';
+	}
+	else {
+		perm[3] = '-';
+	}
+
+	if(fileStat.st_mode & S_ISGID){
+		perm[6] = 's';
+	}
+	else if(fileStat.st_mode & S_IXGRP){
+		perm[6] = 'x';
+	}
+	else {
+		perm[6] = '-';
+	}
+
+	if(fileStat.st_mode & S_ISVTX){
+		perm[9] = 't';
+	}
+	else if(fileStat.st_mode & S_IXOTH){
+		perm[9] = 'x';
+	}
+	else {
+		perm[9] = '-';
+	}
+	perm[10] = 0;
+
+	return perm;
 }
