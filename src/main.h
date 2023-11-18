@@ -10,5 +10,6 @@
 #include "tree.h"
 #include "rm.h"
 #include "mv.h"
+#include "history.h"
 
 #endif

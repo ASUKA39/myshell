@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <glob.h>
+#include <sys/wait.h>
+#include <time.h>
 
 #include "main.h"
 
@@ -40,6 +42,9 @@ static HASH_NODE *regist_func(void) {
     hash_register(hash_table, "tree", tree);
     hash_register(hash_table, "rm", rm);
     hash_register(hash_table, "mv", mv);
+    hash_register(hash_table, "history", history);
+    
+    return NULL;
 }
 
 int main(void) {
@@ -81,6 +86,7 @@ int main(void) {
                 wait(NULL);
             }
         }
+        append_history(linebuf);
         puts("");
     }
     exit(0);
