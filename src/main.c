@@ -4,6 +4,8 @@
 #include <string.h>
 #include <glob.h>
 
+#include "main.h"
+
 #define DELIMS " \t\n"
 
 struct cmd_st {
@@ -48,9 +50,41 @@ int main(void) {
         if(strcmp(cmd.globres.gl_pathv[0], "exit") == 0) {
             exit(0);
         }
-        if(0) {
-            // 内部命令
+
+
+
+
+        if(strcmp(cmd.globres.gl_pathv[0], "cp") == 0) {
+            pid = fork();
+            if(pid < 0) {
+                perror("fork()");
+                exit(1);
+            }
+            if(pid == 0) {
+                cp(cmd.globres.gl_pathc, cmd.globres.gl_pathv);
+                exit(1);
+            } else {
+                wait(NULL);
+            }
         }
+        if(strcmp(cmd.globres.gl_pathv[0], "pwd") == 0) {
+            pid = fork();
+            if(pid < 0) {
+                perror("fork()");
+                exit(1);
+            }
+            if(pid == 0) {
+                pwd(cmd.globres.gl_pathc, cmd.globres.gl_pathv);
+                exit(1);
+            } else {
+                wait(NULL);
+            }
+        }
+
+
+
+
+
         else {
             pid = fork();
             if(pid < 0) {
