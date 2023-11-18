@@ -41,6 +41,7 @@ static HASH_NODE *regist_func(void) {
     hash_register(hash_table, "cp", cp);
     hash_register(hash_table, "pwd", pwd);
     hash_register(hash_table, "cd", cd);
+    hash_register(hash_table, "ls", ls);
 }
 
 int main(void) {
@@ -82,6 +83,7 @@ int main(void) {
                 wait(NULL);
             }
         }
+        puts("");
     }
     exit(0);
 }
