@@ -9,7 +9,7 @@
 
 #define TREE_L 1
 
-static void tree_dir(const char *path, int depth, int level){
+static void tree_dir(const char *path, int depth, int level, int flag){
     DIR *dir, *tmp;
     struct dirent *entry;
     struct stat statbuf;
@@ -21,7 +21,7 @@ static void tree_dir(const char *path, int depth, int level){
     }
 
     if((dir = opendir(path)) == NULL){
-        perror("opendir()");
+        perror("opendir()111");
         printf("%s\n", path);
         return;
     }
@@ -56,25 +56,37 @@ static void tree_dir(const char *path, int depth, int level){
         count--;
 
         if(S_ISDIR(statbuf.st_mode)){
-            if(entry->d_name[0] == '.'){
+            if(entry->d_name[0] == '.' && flag == 0){
+                continue;
+            }
+            else if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0){
                 continue;
             }
             else{
+                for(int i = 0; i < level - depth; i++){
+                    printf("│   ");
+                }
                 if(count == 0){
                     printf("└── %s\n", entry->d_name);
-                    tree_dir(entry->d_name, depth-1, level);
+                    tree_dir(entry->d_name, depth-1, level, flag);
                 }
                 else{
                     printf("├── %s\n", entry->d_name);
-                    tree_dir(entry->d_name, depth-1, level);
+                    tree_dir(entry->d_name, depth-1, level, flag);
                 }
             }
         }
         else{
-            if(entry->d_name[0] == '.'){
+            if(entry->d_name[0] == '.' && flag == 0){
+                continue;
+            }
+            else if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0){
                 continue;
             }
             else{
+                for(int i = 0; i < level - depth; i++){
+                    printf("│   ");
+                }
                 if(count == 0){
                     printf("└── %s\n", entry->d_name);
                 }
@@ -105,6 +117,7 @@ int tree(int argc, char **argv){
     char *path = NULL;
     int opt;
     int max_depth = 1;
+    int flag = 0;
 
     if(argc < 1){
         fprintf(stderr, "Usage...\n");
@@ -112,23 +125,31 @@ int tree(int argc, char **argv){
     else if(argc == 1){
         path = ".";
     }
-    else if(argc == 2){
-        path = argv[1];
-    }
-    else if(argc >= 3){
+
+    else if(argc >= 2){
         path = ".";
-        int depth_idx = 0;
+        int depth_idx = -1;
         for(int i = 1; i < argc; i++){
             if(argv[i][0] == '-'){
-                opt = argv[i][1];
-                switch(opt){
-                    case 'L':
-                        max_depth = atoi(argv[i+1]);
-                        depth_idx = i+1;
-                        break;
-                    default:
-                        fprintf(stderr, "Usage...\n");
-                        exit(1);
+                for(int j = 1; j < strlen(argv[i]); j++){
+                    opt = argv[i][j];
+                    switch(opt){
+                        case 'L':
+                            if(i+1 >= argc || !atoi(argv[i+1])){
+                                printf("Option L missing arg\n");
+                                return 1;
+                            }
+                            max_depth = atoi(argv[i+1]);
+                            depth_idx = i + 1;
+                            printf("max_depth = %d\n", max_depth);
+                            break;
+                        case 'a':
+                            flag = 1;
+                            break;
+                        default:
+                            fprintf(stderr, "Usage...\n");
+                            return 1;
+                    }
                 }
             }
             else if(i != depth_idx){
@@ -138,16 +159,16 @@ int tree(int argc, char **argv){
     }
     else{
         fprintf(stderr, "Arg...\n");
-        exit(1);
+        return 1;
     }
 
     if(path == NULL){
         fprintf(stderr, "Path...\n");
-        exit(1);
+        return 1;
     }
     else{
         printf("%s\n", path);
-        tree_dir(path, max_depth, max_depth);
+        tree_dir(path, max_depth, max_depth, flag);
     }
 
     return 0;

@@ -8,5 +8,6 @@
 #include "cd.h"
 #include "ls.h"
 #include "tree.h"
+#include "rm.h"
 
 #endif

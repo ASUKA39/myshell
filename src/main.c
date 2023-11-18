@@ -38,6 +38,7 @@ static HASH_NODE *regist_func(void) {
     hash_register(hash_table, "cd", cd);
     hash_register(hash_table, "ls", ls);
     hash_register(hash_table, "tree", tree);
+    hash_register(hash_table, "rm", rm);
 }
 
 int main(void) {
