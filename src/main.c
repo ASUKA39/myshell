@@ -17,7 +17,21 @@ struct cmd_st {
 };
 
 static void prompt(void) {
-    printf("mysh$ ");
+    char *pwd;
+    char hostname[128];
+    char username[128];
+
+    pwd = getenv("PWD");
+    if(pwd == NULL) {
+        perror("getenv()");
+        exit(1);
+    }
+
+    gethostname(hostname, 128);
+    getlogin_r(username, 128);
+
+    printf("┌──(%s@%s)-[%s]-\n", username, hostname, pwd);
+    printf("└─$ ");
 }
 
 static void parse(char *line, struct cmd_st *res) {
@@ -61,6 +75,7 @@ int main(void) {
         if(getline(&linebuf, &linebuf_size, stdin) < 0) {
             break;
         }
+        append_history(linebuf);
 
         parse(linebuf, &cmd);
         if(strcmp(cmd.globres.gl_pathv[0], "exit") == 0) {
@@ -87,7 +102,6 @@ int main(void) {
                 wait(NULL);
             }
         }
-        append_history(linebuf);
         puts("");
     }
     exit(0);
