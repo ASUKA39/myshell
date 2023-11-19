@@ -1,13 +1,8 @@
 # myshell
 TODO:
-- main framework
-- cd
-- cp
-- history
-- ls
 - man
-- mv
-- ps
-- pwd
-- rm
-- tree
+- ps: `ps -e` `ps -ef` `ps -aux`
+- tree: print tree structure still has some bugs
+- redirection
+- pipe
+- background
