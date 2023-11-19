@@ -11,5 +11,6 @@
 #include "rm.h"
 #include "mv.h"
 #include "history.h"
+#include "ps.h"
 
 #endif

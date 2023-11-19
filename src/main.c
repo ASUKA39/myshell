@@ -43,6 +43,7 @@ static HASH_NODE *regist_func(void) {
     hash_register(hash_table, "rm", rm);
     hash_register(hash_table, "mv", mv);
     hash_register(hash_table, "history", history);
+    hash_register(hash_table, "ps", ps);
     
     return NULL;
 }
