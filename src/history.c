@@ -46,7 +46,7 @@ int append_history(char *linebuf) {
     tm = localtime(&stamp);
     strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", tm);
     fprintf(fp, "%s\t", timestr);
-    fprintf(fp, "%s\n", linebuf);
+    fprintf(fp, "%s", linebuf);
     fclose(fp);
 
     return 0;
