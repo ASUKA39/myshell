@@ -7,7 +7,17 @@ TODO:
 - pipe
 - background
 
-## development template
+## Useage
+to compile project
+```shell
+make all
+```
+to remove compiled result
+```shell
+make clean
+```
+
+## Development Template
 function template:
 ```c
 #include "cmd_template.h"
