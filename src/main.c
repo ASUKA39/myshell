@@ -102,6 +102,7 @@ int main(void) {
                 wait(NULL);
             }
         }
+        
         puts("");
     }
     exit(0);
